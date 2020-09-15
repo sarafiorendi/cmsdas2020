@@ -2,27 +2,16 @@
 
 void task2_1()
 {
-    int cate = 0;
+    int cate_t = 0;
     
     RooRealVar m("m","",5.0,5.8);
-    RooDataSet *rds_mc = new RooDataSet("rds_mc","",RooArgSet(m));
+    RooRealVar cate("cate","",-1,20);
     
-    TFile *fin = new TFile("bupsikMc.root");
+    TFile *fin = new TFile("/afs/cern.ch/work/k/kfjack/public/cmsdas/bmm/bupsikMc.root");
     TTree *tin = (TTree*)fin->Get("bupsikMc");
     
-    int cate_t;
-    float m_t;
-    tin->SetBranchAddress("cate",&cate_t);
-    tin->SetBranchAddress("m",&m_t);
-
-    for(int evt=0; evt<tin->GetEntries(); evt++) {
-        tin->GetEntry(evt);
-        if (cate_t!=cate) continue;
-        if (m_t<5.0 || m_t>=5.8) continue;
-        m.setVal(m_t);
-        rds_mc->add(RooArgSet(m));
-    }
-    delete fin;
+    RooDataSet* rds_mc   = new RooDataSet("rds_mc", "rds_mc", tin,  RooArgSet(cate, m));
+    rds_mc = (RooDataSet*)rds_mc->reduce(m, Form("m >= 5.0 && m <= 5.8 && cate==%d", cate_t));
     
     RooRealVar sig_mean1("sig_mean1","",5.28,5.2,5.4);
     RooRealVar sig_mean2("sig_mean2","",5.28,5.2,5.4);
@@ -54,8 +43,8 @@ void task2_1()
     TLegend* leg = new TLegend(0.58,0.77,0.93,0.92);
     leg->SetFillStyle(0);
     leg->SetLineWidth(0);
-    leg->SetHeader(Form("Category %d",cate));
-    leg->AddEntry(frame->findObject("t_rds_mc"),"Simluation","EP");
+    leg->SetHeader(Form("Category %d",cate_t));
+    leg->AddEntry(frame->findObject("t_rds_mc"),"Simulation","EP");
     leg->AddEntry(frame->findObject("t_pdf_sig"),"Fit","L");
     leg->Draw();
     
