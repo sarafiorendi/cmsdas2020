@@ -1,6 +1,6 @@
 #include "common.h"
 
-void task2_2()
+void task2_3()
 {
     int cate_t = 0;
     
@@ -21,16 +21,23 @@ void task2_2()
  *     4  sig_sigma1   2.99468e-02   9.04925e-05   3.42182e-05  -9.29776e-02
  *      5  sig_sigma2   1.12346e-01   2.50130e-03   2.66008e-04  -9.58226e-02
  *       */
+    RooRealVar sig_shift("sig_shift","",0.,-0.02,0.02);
+    RooRealVar sig_scale("sig_scale","",1.,0.8,1.2);
     
-    RooRealVar sig_mean1("sig_mean1","",5.27839e+00);
-    RooRealVar sig_mean2("sig_mean2","",5.25550e+00);
-    RooRealVar sig_sigma1("sig_sigma1","",2.99468e-02);
-    RooRealVar sig_sigma2("sig_sigma2","",1.12346e-01);
+    RooRealVar sigmc_mean1("sigmc_mean1","",5.27839e+00);
+    RooRealVar sigmc_mean2("sigmc_mean2","",5.25550e+00);
+    RooRealVar sigmc_sigma1("sigmc_sigma1","",2.99468e-02);
+    RooRealVar sigmc_sigma2("sigmc_sigma2","",1.12346e-01);
+    
+    RooAddition sig_mean1("sig_mean1","",RooArgList(sigmc_mean1,sig_shift));
+    RooAddition sig_mean2("sig_mean2","",RooArgList(sigmc_mean2,sig_shift));
+    RooProduct sig_sigma1("sig_sigma1","",RooArgList(sigmc_sigma1,sig_scale));
+    RooProduct sig_sigma2("sig_sigma2","",RooArgList(sigmc_sigma2,sig_scale));
     RooRealVar sig_frac("sig_frac","",9.65521e-01);
     RooGaussian sig_g1("sig_g1","",m,sig_mean1,sig_sigma1);
     RooGaussian sig_g2("sig_g2","",m,sig_mean2,sig_sigma2);
     RooAddPdf pdf_sig("pdf_sig","",RooArgList(sig_g1,sig_g2),RooArgList(sig_frac));
-    
+        
     RooRealVar comb_coeff("comb_coeff","",-1.2,-10.,10.);
     RooExponential pdf_comb("pdf_comb","",m,comb_coeff);
     
@@ -71,5 +78,5 @@ void task2_2()
     leg->AddEntry(frame->findObject("t_pdf_comb"),"Combinatorial bkg.","L");
     leg->Draw();
     
-    canvas->Print("task2_2.pdf");
+    canvas->Print("task2_3.pdf");
 }
